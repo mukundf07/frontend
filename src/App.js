@@ -1,26 +1,139 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import PropTypes from "prop-types";
+import React, { useEffect, Suspense, lazy } from "react";
+import ScrollToTop from "./helpers/scroll-top";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { ToastProvider } from "react-toast-notifications";
+import { multilanguage, loadLanguages } from "redux-multilanguage";
+import { connect } from "react-redux";
+import { BreadcrumbsProvider } from "react-breadcrumbs-dynamic";
 
-function App() {
+// home pages
+const Home = lazy(() => import("./pages/Home"));
+
+// shop pages
+const Shop = lazy(() => import("./pages/Shop"));
+
+// product pages
+//const Product = lazy(() => import("./pages/shop-product/Product"));
+const Product = lazy(() => import("./pages/Product"));
+
+// blog pages
+const Blog = lazy(() => import("./pages/Blog"));
+
+// other pages
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const MyAccount = lazy(() => import("./pages/MyAccount"));
+const LoginRegister = lazy(() => import("./pages/LoginRegister"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Compare = lazy(() => import("./pages/Compare"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const App = props => {
+  useEffect(() => {
+    props.dispatch(
+      loadLanguages({
+        languages: {
+          en: require("./translations/english.json"),
+          fn: require("./translations/french.json"),
+          de: require("./translations/germany.json")
+        }
+      })
+    );
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    <ToastProvider placement="bottom-left">
+      <BreadcrumbsProvider>
+        <Router>
+          <ScrollToTop>
+            <Suspense
+              fallback={
+                <div className="flone-preloader-wrapper">
+                  <div className="flone-preloader">
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              }
+            >
+              <Switch>
+                <Route
+                  exact
+                  path={process.env.PUBLIC_URL + "/"}
+                  component={Home}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/shop"}
+                  component={Shop}
+                />
+                {/* Shop product pages */}
+                {/* <Route
+                  path={process.env.PUBLIC_URL + "/product/:id"}
+                  render={routeProps => (
+                    <Product {...routeProps} key={routeProps.match.params.id} />
+                  )}
+                /> */}
+                <Route
+                  path={process.env.PUBLIC_URL + "/product/:id"}
+                  component={Product}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/blog"}
+                  component={Blog}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/about"}
+                  component={About}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/contact"}
+                  component={Contact}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/my-account"}
+                  component={MyAccount}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/login-register"}
+                  component={LoginRegister}
+                />
 
-export default App;
+                <Route
+                  path={process.env.PUBLIC_URL + "/cart"}
+                  component={Cart}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/wishlist"}
+                  component={Wishlist}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/compare"}
+                  component={Compare}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/checkout"}
+                  component={Checkout}
+                />
+                <Route
+                  path={process.env.PUBLIC_URL + "/not-found"}
+                  component={NotFound}
+                />
+
+                <Route exact component={NotFound} />
+              </Switch>
+            </Suspense>
+          </ScrollToTop>
+        </Router>
+      </BreadcrumbsProvider>
+    </ToastProvider>
+  );
+};
+
+App.propTypes = {
+  dispatch: PropTypes.func
+};
+
+export default connect()(multilanguage(App));
